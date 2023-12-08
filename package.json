@@ -1,0 +1,24 @@
+{
+  "name": "video-streaming-backend",
+  "version": "1.0.0",
+  "description": "Video streaming application backend using nodeJs",
+  "main": "server.js",
+  "scripts": {
+    "start": "NODE_ENV=production node src/server.js",
+    "dev": "NODE_ENV=development nodemon src/server.js",
+    "prod": "NODE_ENV=production nodemon src/server.js"
+  },
+  "type": "module",
+  "author": "Md. Harun Or Rashid",
+  "keywords": [
+    "nodejs",
+    "expressjs",
+    "mongodb",
+    "restfull-api"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.0"
+  }
+}
