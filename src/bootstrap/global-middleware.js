@@ -10,7 +10,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 const corsOptions = {
-  origin: ["http://localhost:3000"],
+  origin: process.env.CORS_ORIGIN,
   credentials: true,
 };
 
