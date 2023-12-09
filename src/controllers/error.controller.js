@@ -27,7 +27,7 @@ const handleFileUploadError = () => {
 };
 
 const sendErrorDev = (err, req, res) => {
-  logger.error(err);
+  logger.error(err.message);
 
   res.status(err.statusCode).json({
     status: err.status,

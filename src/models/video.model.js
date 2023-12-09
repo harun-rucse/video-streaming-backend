@@ -49,8 +49,6 @@ videoSchema.plugin(mongooseAggregatePaginate);
 
 const validateVideo = (video) => {
   const schema = Joi.object({
-    videoFile: Joi.string().required().label("VideoFile"),
-    thumbnail: Joi.string().required().label("Thumbnail"),
     title: Joi.string().required().label("Title"),
     description: Joi.string().required().label("Description"),
     isPublished: Joi.boolean().label("IsPublished"),
@@ -61,8 +59,6 @@ const validateVideo = (video) => {
 
 const validateVideoUpdate = (video) => {
   const schema = Joi.object({
-    videoFile: Joi.string().label("VideoFile"),
-    thumbnail: Joi.string().label("Thumbnail"),
     title: Joi.string().label("Title"),
     description: Joi.string().label("Description"),
     isPublished: Joi.boolean().label("IsPublished"),

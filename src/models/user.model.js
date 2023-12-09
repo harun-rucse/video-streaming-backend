@@ -83,8 +83,6 @@ const validateUser = (user) => {
     email: Joi.string().email().required().label("Email"),
     fullName: Joi.string().required().label("FullName"),
     password: Joi.string().min(4).max(20).required().label("Password"),
-    avatar: Joi.string().required().label("Avatar"),
-    coverImage: Joi.string().label("CoverImage"),
   });
 
   return schema.validate(user);
@@ -95,8 +93,6 @@ const validateUserUpdate = (user) => {
     userName: Joi.string().label("UserName"),
     email: Joi.string().email().label("Email"),
     fullName: Joi.string().label("FullName"),
-    avatar: Joi.string().label("Avatar"),
-    coverImage: Joi.string().label("CoverImage"),
   });
 
   return schema.validate(user);
