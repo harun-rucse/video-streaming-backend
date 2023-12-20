@@ -101,12 +101,11 @@ const refresh = catchAsync(async (req, res, next) => {
   const user = await userService.getOneUser({ _id: decoded.id });
   if (!user) return next(new AppError("The user belonging to this token does no longer exist", 401));
 
-  const token = tokenService.findRefreshToken(refreshToken, user._id);
+  const token = await tokenService.findRefreshToken(refreshToken, user._id);
   if (!token) return next(new AppError("Invalid refresh token", 401));
 
-  // Generate new tokens
+  // Generate new tokens and send
   _generateAndSendTokens(200, "Access token refreshed", user, res);
-  // Send response
 });
 
 export { register, login, logout, profile, refresh };
