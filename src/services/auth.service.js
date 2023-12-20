@@ -26,4 +26,15 @@ const register = async (payload, files) => {
   return user;
 };
 
-export { register };
+const login = async (userName, password) => {
+  const user = await userService.getOneUser({ $or: [{ userName }, { email: userName }] }).select("+password");
+  const isMatch = await user?.correctPassword(password, user.password);
+
+  if (!isMatch) {
+    throw new AppError("Incorrect login credential.", 401);
+  }
+
+  return user;
+};
+
+export { register, login };

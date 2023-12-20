@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:4.0-xenial
+    ports:
+      - 27017:27017
+    volumes:
+      - video-streaming:/data/db
+
+  api:
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./
+    container_name: api
+    restart: always
+    ports:
+      - 4000:4000
+    env_file:
+      - ./.env.development
+    volumes:
+      - .:/app/video-streaming-api
+    depends_on:
+      - mongodb
+
+volumes:
+  video-streaming:

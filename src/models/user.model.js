@@ -40,8 +40,6 @@ const userSchema = new Schema(
     passwordResetExpired: Date,
   },
   {
-    toJSON: { virtuals: true },
-    toObject: { virtuals: true },
     timestamps: true,
   }
 );
