@@ -7,18 +7,18 @@ import catchAsync from "../utils/catch-async.js";
 import AppError from "../utils/app-error.js";
 import ApiResponse from "../utils/api-response.js";
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+};
+
 const _generateAndSendTokens = async (statusCode, message, user, res) => {
   const { accessToken, refreshToken } = tokenService.generateTokens({ id: user._id });
   await tokenService.removeRefreshToken(user._id);
   await tokenService.storeRefreshToken(refreshToken, user._id);
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
-  res.cookie("access_token", accessToken, options);
-  res.cookie("refresh_token", refreshToken, options);
+  res.cookie("access_token", accessToken, cookieOptions);
+  res.cookie("refresh_token", refreshToken, cookieOptions);
 
   const payload = _.pick(user, ["userName", "email", "fullName", "avatar", "coverImage"]);
   const data = { accessToken, refreshToken, ...payload };
@@ -65,13 +65,8 @@ const login = catchAsync(async (req, res, next) => {
 const logout = catchAsync(async (req, res, next) => {
   await tokenService.removeRefreshToken(req.user._id);
 
-  const options = {
-    httpOnly: true,
-    secure: true,
-  };
-
-  res.clearCookie("access_token", options);
-  res.clearCookie("refresh_token", options);
+  res.clearCookie("access_token", cookieOptions);
+  res.clearCookie("refresh_token", cookieOptions);
 
   res.status(200).json(new ApiResponse(200, {}, "Logout successful"));
 });
@@ -89,4 +84,29 @@ const profile = catchAsync(async (req, res, next) => {
   res.status(200).json(new ApiResponse(200, data));
 });
 
-export { register, login, logout, profile };
+/**
+ * @desc    Generate new access-token from refresh-token
+ * @route   POST /api/auth/refresh-token
+ * @access  Public
+ */
+const refresh = catchAsync(async (req, res, next) => {
+  // Get refreshToken from cookie or req body
+  const refreshToken = req.cookies.refresh_token || req.body.refresh_token;
+  if (!refreshToken) return next(new AppError("Refresh token is required", 400));
+
+  // Verify refreshToken
+  const decoded = await tokenService.verifyRefreshToken(refreshToken);
+
+  // Check it exits in db for this user
+  const user = await userService.getOneUser({ _id: decoded.id });
+  if (!user) return next(new AppError("The user belonging to this token does no longer exist", 401));
+
+  const token = tokenService.findRefreshToken(refreshToken, user._id);
+  if (!token) return next(new AppError("Invalid refresh token", 401));
+
+  // Generate new tokens
+  _generateAndSendTokens(200, "Access token refreshed", user, res);
+  // Send response
+});
+
+export { register, login, logout, profile, refresh };

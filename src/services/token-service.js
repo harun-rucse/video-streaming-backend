@@ -22,6 +22,10 @@ const removeRefreshToken = (user_id) => {
   return Token.findOneAndDelete({ user: user_id });
 };
 
+const findRefreshToken = (token, user_id) => {
+  return Token.findOne({ token, user: user_id });
+};
+
 const verifyAccessToken = (token) => {
   return promisify(jwt.verify)(token, process.env.ACCESS_TOKEN_SECRET);
 };
@@ -30,4 +34,11 @@ const verifyRefreshToken = (token) => {
   return promisify(jwt.verify)(token, process.env.REFRESH_TOKEN_SECRET);
 };
 
-export { generateTokens, storeRefreshToken, removeRefreshToken, verifyAccessToken, verifyRefreshToken };
+export {
+  generateTokens,
+  storeRefreshToken,
+  removeRefreshToken,
+  findRefreshToken,
+  verifyAccessToken,
+  verifyRefreshToken,
+};
