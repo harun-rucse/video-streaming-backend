@@ -10,4 +10,8 @@ const createNewUser = (payload) => {
   return user.save();
 };
 
-export { getOneUser, createNewUser };
+const updateOneUser = (filter, payload) => {
+  return User.findOneAndUpdate(filter, payload, { new: true });
+};
+
+export { getOneUser, createNewUser, updateOneUser };

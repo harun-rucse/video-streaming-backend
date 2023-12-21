@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { validateUser } from "../models/user.model.js";
+import { validateUser, validateUserUpdate } from "../models/user.model.js";
 import * as authService from "../services/auth.service.js";
 import * as tokenService from "../services/token-service.js";
 import * as userService from "../services/user-service.js";
@@ -76,7 +76,7 @@ const logout = catchAsync(async (req, res, next) => {
  * @route   GET /api/auth/profile
  * @access  Private
  */
-const profile = catchAsync(async (req, res, next) => {
+const getProfile = catchAsync(async (req, res, next) => {
   const user = await userService.getOneUser({ _id: req.user._id });
 
   const data = _.pick(user, ["userName", "email", "fullName", "avatar", "coverImage", "watchHistory"]);
@@ -89,7 +89,7 @@ const profile = catchAsync(async (req, res, next) => {
  * @route   POST /api/auth/refresh-token
  * @access  Public
  */
-const refresh = catchAsync(async (req, res, next) => {
+const refreshAccessToken = catchAsync(async (req, res, next) => {
   // Get refreshToken from cookie or req body
   const refreshToken = req.cookies.refresh_token || req.body.refresh_token;
   if (!refreshToken) return next(new AppError("Refresh token is required", 400));
@@ -108,4 +108,37 @@ const refresh = catchAsync(async (req, res, next) => {
   _generateAndSendTokens(200, "Access token refreshed", user, res);
 });
 
-export { register, login, logout, profile, refresh };
+/**
+ * @desc    Update user profile
+ * @route   PATCH /api/auth/profile
+ * @access  Private
+ */
+const updateProfile = catchAsync(async (req, res, next) => {
+  const { error } = validateUserUpdate(req.body);
+  if (error) return next(new AppError(error.details[0].message, 400));
+
+  const payload = _.pick(req.body, ["userName", "email", "fullName"]);
+  const user = await authService.updateProfile(req.user._id, payload);
+
+  res.status(200).json(new ApiResponse(200, user, "Profile update successful"));
+});
+
+/**
+ * @desc    Update user password
+ * @route   PATCH /api/auth/update-password
+ * @access  Private
+ */
+const updatePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, password } = req.body;
+
+  if (!currentPassword || !password) {
+    return next(new AppError("Password is required.", 400));
+  }
+
+  const payload = _.pick(req.body, ["currentPassword", "password"]);
+  const user = await authService.updatePassword(req.user._id, payload);
+
+  _generateAndSendTokens(200, "Password update successful", user, res);
+});
+
+export { register, login, logout, getProfile, refreshAccessToken, updateProfile, updatePassword };
