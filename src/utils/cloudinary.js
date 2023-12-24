@@ -1,5 +1,6 @@
 import { v2 as cloudinary } from "cloudinary";
 import streamifier from "streamifier";
+import { extractPublicId } from "cloudinary-build-url";
 
 // Upload file to the cloudinary cloud
 const uploadOnCloud = async (buffer, folder) => {
@@ -26,4 +27,18 @@ const uploadOnCloud = async (buffer, folder) => {
   });
 };
 
-export { uploadOnCloud };
+// Delete file from Cloudinary based on the public ID in the URL
+const deleteFromCloud = async (cloudinaryUrl) => {
+  // Extract public ID from the Cloudinary URL
+  const publicId = extractPublicId(cloudinaryUrl);
+
+  // Call Cloudinary API to delete the file
+  try {
+    const deletionResult = await cloudinary.uploader.destroy(publicId);
+    return deletionResult;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { uploadOnCloud, deleteFromCloud };

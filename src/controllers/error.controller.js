@@ -1,3 +1,4 @@
+import multer from "multer";
 import AppError from "../utils/app-error.js";
 import logger from "../logger/index.js";
 
@@ -22,8 +23,8 @@ const handleJWTExpiredError = () => {
   return new AppError("Token has expired. Please login again.", 401);
 };
 
-const handleFileUploadError = () => {
-  return new AppError("Image Upload failed. Please try again.", 400);
+const handleMulterUnexpectedFieldError = (err) => {
+  return new AppError(`Image Upload failed. Unexpected field ${err.field}`, 400);
 };
 
 const sendErrorDev = (err, req, res) => {
@@ -55,6 +56,7 @@ const sendErrorProd = (err, req, res) => {
   } else {
     // Log unknown errors
     logger.error(err);
+    // console.log(err);
 
     res.status(500).json({
       status: "error",
@@ -78,7 +80,9 @@ const globalErrorHandler = (err, req, res, next) => {
     if (error.code === 11000) error = handleDuplicateFieldDB(error);
     if (error.name === "JsonWebTokenError") error = handleJWTError();
     if (error.name === "TokenExpiredError") error = handleJWTExpiredError();
-    if (req.file) error = handleFileUploadError();
+    if (error.name === "MulterError") {
+      if (error.code === "LIMIT_UNEXPECTED_FILE") error = handleMulterUnexpectedFieldError(error);
+    }
 
     if (process.env.NODE_ENV === "test") {
       sendErrorTest(error, req, res);
