@@ -106,9 +106,9 @@ const validateUserPassword = (user) => {
 
 const validateUpdatePassword = (user) => {
   const schema = Joi.object({
-    passwordCurrent: Joi.string().required().label("Current Password"),
+    currentPassword: Joi.string().required().label("Current Password"),
     password: Joi.string().min(4).max(20).required().label("Password"),
-    passwordConfirm: Joi.any()
+    confirmPassword: Joi.any()
       .equal(Joi.ref("password"))
       .required()
       .label("Confirm password")

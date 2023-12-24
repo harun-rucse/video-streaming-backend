@@ -1,5 +1,5 @@
 import _ from "lodash";
-import { validateUser, validateUserUpdate } from "../models/user.model.js";
+import { validateUser, validateUpdatePassword } from "../models/user.model.js";
 import * as authService from "../services/auth.service.js";
 import * as tokenService from "../services/token-service.js";
 import * as userService from "../services/user-service.js";
@@ -72,19 +72,6 @@ const logout = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @desc    Get user profile
- * @route   GET /api/auth/profile
- * @access  Private
- */
-const getProfile = catchAsync(async (req, res, next) => {
-  const user = await userService.getOneUser({ _id: req.user._id });
-
-  const data = _.pick(user, ["userName", "email", "fullName", "avatar", "coverImage", "watchHistory"]);
-
-  res.status(200).json(new ApiResponse(200, data));
-});
-
-/**
  * @desc    Generate new access-token from refresh-token
  * @route   POST /api/auth/refresh-token
  * @access  Public
@@ -109,31 +96,13 @@ const refreshAccessToken = catchAsync(async (req, res, next) => {
 });
 
 /**
- * @desc    Update user profile
- * @route   PATCH /api/auth/profile
- * @access  Private
- */
-const updateProfile = catchAsync(async (req, res, next) => {
-  const { error } = validateUserUpdate(req.body);
-  if (error) return next(new AppError(error.details[0].message, 400));
-
-  const payload = _.pick(req.body, ["userName", "email", "fullName"]);
-  const user = await authService.updateProfile(req.user._id, payload);
-
-  res.status(200).json(new ApiResponse(200, user, "Profile update successful"));
-});
-
-/**
  * @desc    Update user password
  * @route   PATCH /api/auth/update-password
  * @access  Private
  */
 const updatePassword = catchAsync(async (req, res, next) => {
-  const { currentPassword, password } = req.body;
-
-  if (!currentPassword || !password) {
-    return next(new AppError("Password is required.", 400));
-  }
+  const { error } = validateUpdatePassword(req.body);
+  if (error) return next(new AppError(error.details[0].message, 400));
 
   const payload = _.pick(req.body, ["currentPassword", "password"]);
   const user = await authService.updatePassword(req.user._id, payload);
@@ -141,4 +110,4 @@ const updatePassword = catchAsync(async (req, res, next) => {
   _generateAndSendTokens(200, "Password update successful", user, res);
 });
 
-export { register, login, logout, getProfile, refreshAccessToken, updateProfile, updatePassword };
+export { register, login, logout, refreshAccessToken, updatePassword };
